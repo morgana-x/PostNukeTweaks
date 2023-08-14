@@ -7,6 +7,8 @@ using System.Linq;
 using UnityEngine;
 using Respawning;
 using Exiled.Events.EventArgs.Server;
+using Exiled.API.Features.DamageHandlers;
+using Exiled.Events.EventArgs.Player;
 
 namespace PostNukeSurfaceTweaks
 {
@@ -16,23 +18,39 @@ namespace PostNukeSurfaceTweaks
         public CoroutineHandle radiationHandle;
         public IEnumerator<float> radiationTimer()
         {
-            Log.Debug("Waiting for radiation delay");
             yield return Timing.WaitForSeconds(Plugin.Instance.Config.RadiationDelay);
-            Log.Debug("started radiation");
             while (Plugin.Instance.Config.RadiationEnabled) 
             {
                 foreach (Player pl in Player.List) 
                 {
+                    if (pl.IsDead)
+                    {
+                        continue;
+                    }
+                    if (Plugin.Instance.Config.RadiationImmuneRoles.Contains(pl.Role.Type))
+                    {
+                        continue;
+                    }
+                    if (Plugin.Instance.Config.RadiationOnlyAffectSurface && (pl.Zone != ZoneType.Surface))
+                    {
+                        continue;
+                    }
                     float dmg = Plugin.Instance.Config.RadiationDamage;
 
                     if (pl.IsScp)
                     {
                         dmg = dmg * Plugin.Instance.Config.RadiationSCPMultiplier;
                     }
-                    pl.Hurt(dmg, DamageType.Warhead);
+                    if (pl.Health - dmg <= 0)
+                    {
+                        pl.Kill(Plugin.Instance.Config.RadiationDeathMessage);
+                        continue;
+                    }
+                    pl.Health = pl.Health - dmg; //pl.Hurt(dmg, DamageType.Decontamination);
+                    
                     foreach(EffectType effect in Plugin.Instance.Config.RadiationEffects)
                     {
-                        pl.EnableEffect(effect, 999);
+                        pl.EnableEffect(effect, Plugin.Instance.Config.RadiationInterval);
                     }
                 }
                 yield return Timing.WaitForSeconds(Plugin.Instance.Config.RadiationInterval);
@@ -53,33 +71,37 @@ namespace PostNukeSurfaceTweaks
         }
         public void ResetRoomColors()
         {
-            Log.Debug("Resetting room colors.");
             List<Room> SurfaceRooms = getSurfaceRooms();
             foreach (Room room in SurfaceRooms)
             {
                 room.Color = Color.white;
-                Log.Debug("Reset " + room.ToString() + "'s color");
                 if (Plugin.Instance.Config.RoomColor == new Color(-1, -1, -1))
                     continue;
                 room.Color = Plugin.Instance.Config.RoomColor;
-                Log.Debug("Set " + room.ToString() + "'s color to " + room.Color.ToString());
+                //Log.Debug("Set " + room.ToString() + "'s color to " + room.Color.ToString());
             }
         }
         public IEnumerator<float> applyChanges()
         {
-            Log.Debug("waiting to apply changes");
 
             yield return Timing.WaitForSeconds(Plugin.Instance.Config.NukeChangesDelay);
 
-            Log.Debug("Applying changes~");
-
+            if (Plugin.Instance.Config.Debug) // temp fix
+            {
+                foreach (Player pl in Player.List)
+                {
+                    if (pl.IsNPC)
+                    {
+                        pl.Health = pl.MaxHealth;
+                    }
+                }
+            }
 
             if (Plugin.Instance.Config.RadiationEnabled)
             {
                 Timing.KillCoroutines(radiationHandle);
                 radiationHandle = Timing.RunCoroutine(radiationTimer());
             }
-
 
             if (Plugin.Instance.Config.RoomChangeColors)
             {
@@ -93,27 +115,17 @@ namespace PostNukeSurfaceTweaks
                 }
                 ResetRoomColors();
             }
-   
-            Log.Debug("Applied changes.");
             yield break;
         }
         public void OnNukeDetonated()
         {
-            Log.Debug("Nuke detonated!");
             Timing.KillCoroutines(applyChangesHandle);
             applyChangesHandle = Timing.RunCoroutine(applyChanges());
-            Log.Debug("Started apply changes handle!");
         }
         public void OnWaitingForPlayers()
         {
             Timing.KillCoroutines(applyChangesHandle);
             Timing.KillCoroutines(radiationHandle);
-            Log.Debug("Cleaned up coroutines.");
-            List<Room> SurfaceRooms = Room.Get(ZoneType.Surface).ToList();
-            foreach (Room room in SurfaceRooms)
-            {
-                Log.Debug(room.ToString() + "'s color is " + room.Color.ToString());
-            }
         }
 
         public void RespawningTeam(RespawningTeamEventArgs ev)
@@ -122,7 +134,6 @@ namespace PostNukeSurfaceTweaks
             {
                 return;
             }
-            Log.Debug("Disallowing respawn");
             ev.IsAllowed = false;
         }
     }

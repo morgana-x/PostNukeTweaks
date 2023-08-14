@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using Exiled.API.Features;
 using Exiled.API.Enums;
+using PlayerRoles;
+
 namespace PostNukeSurfaceTweaks
 {
     public class Config : IConfig
@@ -39,8 +41,14 @@ namespace PostNukeSurfaceTweaks
         [Description("Radiation damage multiplier for scps")]
         public float RadiationSCPMultiplier { get; set; } = 25;
 
+        [Description("Should radiation only affect people on surface")]
+        public bool RadiationOnlyAffectSurface { get; set; } = true;
+
         [Description("How often radiation affects are applied")]
         public float RadiationInterval { get; set; } = 2f;
+
+        [Description("Radiation custom death message")]
+        public string RadiationDeathMessage { get; set; } = "Died from Radiation Poisioning.";
 
         [Description("List of effects given from radiation")]
         public List<EffectType> RadiationEffects {get; set;} = new List<EffectType>()
@@ -48,6 +56,12 @@ namespace PostNukeSurfaceTweaks
             EffectType.Burned,
             EffectType.Exhausted,
             EffectType.Concussed
+        };
+
+        [Description("List of roles immune to radiation")]
+        public List<RoleTypeId> RadiationImmuneRoles { get; set; } = new List<RoleTypeId>()
+        {
+            RoleTypeId.Tutorial
         };
     }
 }
