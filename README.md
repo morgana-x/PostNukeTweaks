@@ -1,3 +1,5 @@
+# Notice
+This is outdated and I'm hitting alot of roadblocks while updating it and may need to wait for a more stable exiled 8 release
 # PostNukeTweaks
 Small Exiled 7 plugin that does things after the Warhead detonates
 
