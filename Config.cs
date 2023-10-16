@@ -51,7 +51,7 @@ namespace PostNukeSurfaceTweaks
         public string RadiationDeathMessage { get; set; } = "Died from Radiation Poisioning.";
 
         [Description("List of effects given from radiation")]
-        public List<EffectType> RadiationEffects {get; set;} = new List<EffectType>()
+        public List<EffectType> RadiationEffects { get; set; } = new List<EffectType>()
         {
             EffectType.Burned,
             EffectType.Exhausted,
