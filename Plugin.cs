@@ -1,11 +1,13 @@
 ﻿using Exiled.API.Features;
+using Exiled.Events.EventArgs.Server;
 using Exiled.Events.Handlers;
 using MEC;
+
 namespace PostNukeSurfaceTweaks
 {
     public sealed class Plugin : Plugin<Config>
     {
-        public override string Author => "morgana";
+        public override string Author => "morgana, Vicious Vikki";
 
         public override string Name => "PostNukeSurfaceTweaks";
 
@@ -47,7 +49,7 @@ namespace PostNukeSurfaceTweaks
             Exiled.Events.Handlers.Server.RespawningTeam -= _handlers.RespawningTeam;
             Exiled.Events.Handlers.Server.WaitingForPlayers -= _handlers.OnWaitingForPlayers;
             Timing.KillCoroutines(_handlers.applyChangesHandle, _handlers.radiationHandle);
-            
+
             _handlers = null;
         }
     }

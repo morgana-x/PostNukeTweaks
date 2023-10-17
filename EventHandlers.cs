@@ -19,9 +19,9 @@ namespace PostNukeSurfaceTweaks
         public IEnumerator<float> radiationTimer()
         {
             yield return Timing.WaitForSeconds(Plugin.Instance.Config.RadiationDelay);
-            while (Plugin.Instance.Config.RadiationEnabled) 
+            while (Plugin.Instance.Config.RadiationEnabled)
             {
-                foreach (Player pl in Player.List) 
+                foreach (Player pl in Player.List)
                 {
                     if (pl.IsDead)
                     {
@@ -47,8 +47,8 @@ namespace PostNukeSurfaceTweaks
                         continue;
                     }
                     pl.Health = pl.Health - dmg; //pl.Hurt(dmg, DamageType.Decontamination);
-                    
-                    foreach(EffectType effect in Plugin.Instance.Config.RadiationEffects)
+
+                    foreach (EffectType effect in Plugin.Instance.Config.RadiationEffects)
                     {
                         pl.EnableEffect(effect, Plugin.Instance.Config.RadiationInterval);
                     }
@@ -60,7 +60,7 @@ namespace PostNukeSurfaceTweaks
         public List<Room> getSurfaceRooms()
         {
             List<Room> surfaceRooms = new List<Room>();
-            foreach(Room r in Room.List)
+            foreach (Room r in Room.List)
             {
                 if (r.Zone == ZoneType.Surface)
                 {
